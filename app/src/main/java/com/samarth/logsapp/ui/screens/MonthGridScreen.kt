@@ -36,21 +36,18 @@ import com.samarth.logsapp.ui.theme.AccentColor
 import com.samarth.logsapp.ui.theme.AccentDimColor
 import com.samarth.logsapp.ui.theme.InputBorderColor
 import com.samarth.logsapp.ui.theme.MutedColor
-import kotlin.math.ln
-import kotlin.math.min
 
-private const val WORD_COUNT_CAP = 150 // word count at/above which a dot reaches max size
-private val MIN_DOT_SIZE = 5.dp
-private val MAX_DOT_SIZE = 18.dp
+private val WRITTEN_DOT_SIZE = 9.dp
+private val UNWRITTEN_DOT_SIZE = 4.dp
+private val RING_SIZE = 18.dp
 
 /**
  * Month-grid history. Every cell is a real calendar day (Monday-first);
  * days with no entry show only a faint static outline and are not
  * tappable at all — the grid itself communicates "you wrote or you
- * didn't," with no separate list needed. Days that were written show a
- * filled dot whose *size* scales with word count on a log curve, so a
- * two-line day and a two-page day are visually distinct at a glance
- * without needing numbers or a legend.
+ * didn't," with no separate list needed. Written days show a plain
+ * filled dot, uniform size, so the grid stays quiet and legible rather
+ * than trying to encode how much you wrote that day.
  */
 @Composable
 fun MonthGridScreen(
@@ -184,20 +181,17 @@ private fun CalendarGrid(days: List<DayCell>, onDayTap: (String) -> Unit) {
 
 @Composable
 private fun DayCellView(cell: DayCell, onDayTap: (String) -> Unit) {
-    val written = cell.wordCount != null && cell.wordCount > 0
-    val dotSize = if (written) dotSizeForWordCount(cell.wordCount!!) else MIN_DOT_SIZE
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .aspectRatio(1f)
             .then(
-                if (written) Modifier.clickable { onDayTap(cell.dateKey) } else Modifier
+                if (cell.written) Modifier.clickable { onDayTap(cell.dateKey) } else Modifier
             )
     ) {
         Box(
             modifier = Modifier
-                .size(MAX_DOT_SIZE)
+                .size(RING_SIZE)
                 .then(
                     if (cell.isToday) {
                         Modifier.drawBehind {
@@ -213,25 +207,19 @@ private fun DayCellView(cell: DayCell, onDayTap: (String) -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(dotSize)
+                    .size(if (cell.written) WRITTEN_DOT_SIZE else UNWRITTEN_DOT_SIZE)
                     .clip(CircleShape)
-                    .background(if (written) AccentColor else InputBorderColor)
+                    .background(if (cell.written) AccentColor else InputBorderColor)
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = cell.dayOfMonth.toString(),
             style = MaterialTheme.typography.labelSmall,
-            color = if (written) MutedColor else InputBorderColor,
+            color = if (cell.written) MutedColor else InputBorderColor,
             fontSize = 10.sp
         )
     }
-}
-
-/** Log-scaled dot diameter so a handful of extra words doesn't dominate the visual, but the difference between a short and long day is still obvious. */
-private fun dotSizeForWordCount(wordCount: Int): androidx.compose.ui.unit.Dp {
-    val ratio = min(1f, (ln((wordCount + 1).toDouble()) / ln((WORD_COUNT_CAP + 1).toDouble())).toFloat())
-    return MIN_DOT_SIZE + (MAX_DOT_SIZE - MIN_DOT_SIZE) * ratio
 }
 
 @Composable

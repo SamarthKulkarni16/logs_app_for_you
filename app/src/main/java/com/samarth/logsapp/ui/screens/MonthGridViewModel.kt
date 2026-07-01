@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-/** One calendar cell's data — null wordCount means nothing was written that day. */
+/** One calendar cell's data — written=false means nothing was logged that day. */
 data class DayCell(
     val dateKey: String,
     val dayOfMonth: Int,
-    val wordCount: Int?,
+    val written: Boolean,
     val isToday: Boolean
 )
 
@@ -59,15 +59,10 @@ class MonthGridViewModel(
             val cells = (1..month.lengthOfMonth()).map { day ->
                 val date = month.atDay(day)
                 val key = date.toString() // yyyy-MM-dd, matches LogFileStore's dateKey format
-                val wordCount = if (key in writtenKeys) {
-                    // Only compute word counts for days actually written —
-                    // avoids touching disk for every empty cell in the grid.
-                    fileStore.wordCount(key)
-                } else null
                 DayCell(
                     dateKey = key,
                     dayOfMonth = day,
-                    wordCount = wordCount,
+                    written = key in writtenKeys,
                     isToday = key == todayKey
                 )
             }
@@ -92,7 +87,7 @@ class MonthGridViewModel(
         }
     }
 
-    /** Only ever called for cells where wordCount != null (grid enforces this at the UI layer, but this is the single source of truth). */
+    /** Only ever called for cells where written == true (grid enforces this at the UI layer, but this is the single source of truth). */
     fun openDay(dateKey: String) {
         viewModelScope.launch {
             _selectedDateKey.value = dateKey
