@@ -1,0 +1,12 @@
+name: Verify Gemini key (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Gemini models endpoint
+        run: |
+          curl -sf "https://generativelanguage.googleapis.com/v1beta/models?key=${{ secrets.GEMINI_API_KEY }}" -o /dev/null
