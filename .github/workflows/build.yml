@@ -1,0 +1,65 @@
+name: Build signed release APK
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+
+# contents:write is required for softprops/action-gh-release to create
+# releases and upload assets. Declared explicitly here rather than relying
+# on repo-level default token permissions, which GitHub restricts to
+# read-only by default on many repos (silent "Resource not accessible by
+# integration" failure otherwise).
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+
+      - name: Build signed release APK
+        env:
+          RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease \
+            -PSUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            -PSUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            -PGOOGLE_WEB_CLIENT_ID="${{ secrets.GOOGLE_WEB_CLIENT_ID }}" \
+            -PGEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
+
+      - name: Clean up keystore from runner
+        if: always()
+        run: rm -f release.keystore
+
+      - name: Rename APK for public download
+        run: cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/daily-logs.apk
+
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Daily Logs v1.0.${{ github.run_number }}"
+          files: app/build/outputs/apk/release/daily-logs.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

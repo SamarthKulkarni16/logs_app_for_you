@@ -1,0 +1,10 @@
+# Copy this file to `local.properties` (which is gitignored) and fill in
+# real values for local builds. CI builds get these from GitHub Actions
+# secrets instead — see .github/workflows/build.yml.
+
+sdk.dir=/path/to/your/Android/sdk
+
+SUPABASE_URL=https://rrwycwlahzcxldowvfnm.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+GOOGLE_WEB_CLIENT_ID=your-google-web-client-id-here
+GEMINI_API_KEY=your-gemini-api-key-here
