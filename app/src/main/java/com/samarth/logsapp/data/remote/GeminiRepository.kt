@@ -66,7 +66,7 @@ class GeminiRepository(private val apiKey: String) {
                 }.toString()
 
                 val url = URL(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey"
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
                 )
                 val connection = (url.openConnection() as HttpURLConnection).apply {
                     requestMethod = "POST"
