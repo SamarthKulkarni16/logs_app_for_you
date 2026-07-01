@@ -41,98 +41,76 @@
     flex:1.15;
     min-height:0;
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     justify-content:center;
-    padding:5vh 6vw 2vh;
+    padding:max(7vh, calc(env(safe-area-inset-top) + 34px)) 6vw 2vh;
     position:relative;
   }
 
-  .grid-card{
+  .stage{
     width:100%;
-    max-width:400px;
-    display:flex;
-    flex-direction:column;
-    gap:0;
-  }
-
-  .grid-month-label{
-    font-family:'Source Serif 4', Georgia, serif;
-    font-weight:600;
-    font-size:clamp(1.3rem, 1.0rem + 1.2vw, 1.6rem);
-    color:var(--text-primary);
-    letter-spacing:-0.01em;
-    margin-bottom:0.3rem;
-  }
-
-  .grid-sub{
-    font-size:0.72rem;
-    font-weight:500;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color:var(--text-muted);
-    margin-bottom:1.6rem;
-  }
-
-  .weekday-row{
-    display:grid;
-    grid-template-columns:repeat(7, 1fr);
-    margin-bottom:0.5rem;
-  }
-  .weekday-row span{
-    font-size:0.62rem;
-    font-weight:500;
-    color:var(--text-faint);
-    text-align:center;
-    letter-spacing:0.04em;
-  }
-
-  .day-grid{
-    display:grid;
-    grid-template-columns:repeat(7, 1fr);
-    row-gap:0.85rem;
-  }
-
-  .day-cell{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:0.32rem;
-  }
-
-  .day-dot-wrap{
-    width:18px;
-    height:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    max-width:420px;
     position:relative;
+    height:100%;
   }
 
-  .day-dot{
-    width:5px;
-    height:5px;
-    border-radius:50%;
-    background:var(--hairline);
-    transition:width 0.5s cubic-bezier(.2,.8,.2,1), height 0.5s cubic-bezier(.2,.8,.2,1), background-color 0.5s ease;
-  }
-  .day-dot.written{ background:var(--sage); }
-
-  .today-ring{
+  .view{
     position:absolute;
     inset:0;
-    border-radius:50%;
-    border:1.2px solid transparent;
-    transition:border-color 0.4s ease;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity 0.45s ease, transform 0.45s ease;
+    pointer-events:none;
   }
-  .today-ring.active{ border-color:rgba(139,157,131,0.55); }
+  .view.visible{
+    opacity:1;
+    transform:translateY(0);
+  }
 
-  .day-num{
-    font-size:0.58rem;
-    color:var(--text-faint);
+  /* ---- write view ---- */
+  .date-heading{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:600;
+    font-size:clamp(1.4rem, 1.05rem + 1.4vw, 1.75rem);
+    color:var(--text-primary);
+    letter-spacing:-0.01em;
+    line-height:1.15;
   }
+
+  .time-label{
+    font-size:0.7rem;
+    font-weight:500;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    margin-top:0.35rem;
+  }
+
+  .entry-body{
+    margin-top:1.5rem;
+    font-size:clamp(0.92rem, 0.83rem + 0.35vw, 1.0rem);
+    line-height:1.65;
+    color:var(--text-primary);
+    min-height:6em;
+    font-weight:400;
+  }
+
+  .cursor{
+    display:inline-block;
+    width:2px;
+    height:1.1em;
+    background:var(--text-primary);
+    margin-left:1px;
+    vertical-align:-0.18em;
+    animation:blink 1s step-start infinite;
+  }
+  .cursor.hidden{ display:none; }
+  @keyframes blink{ 50%{ opacity:0; } }
 
   .status-row{
-    margin-top:1.7rem;
+    margin-top:1.5rem;
     display:flex;
     align-items:center;
     gap:0.5rem;
@@ -163,6 +141,116 @@
   }
   .status-text.sage{ color:var(--sage); }
 
+  /* ---- grid view ---- */
+  .grid-month-label{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:600;
+    font-size:clamp(1.2rem, 0.95rem + 1vw, 1.45rem);
+    color:var(--text-primary);
+    letter-spacing:-0.01em;
+    margin-bottom:1.4rem;
+  }
+
+  .weekday-row{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    margin-bottom:0.5rem;
+  }
+  .weekday-row span{
+    font-size:0.6rem;
+    font-weight:500;
+    color:var(--text-faint);
+    text-align:center;
+    letter-spacing:0.04em;
+  }
+
+  .day-grid{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    row-gap:0.8rem;
+  }
+
+  .day-cell{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.3rem;
+  }
+
+  .day-dot-wrap{
+    width:18px;
+    height:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  .day-dot{
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    background:var(--hairline);
+    transition:background-color 0.35s ease, transform 0.35s ease;
+  }
+  .day-dot.written{
+    background:var(--sage);
+    width:8px;
+    height:8px;
+  }
+  .day-dot.tapped{
+    transform:scale(1.5);
+  }
+
+  .today-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1.2px solid transparent;
+    transition:border-color 0.4s ease;
+  }
+  .today-ring.active{ border-color:rgba(139,157,131,0.5); }
+
+  .tap-ring{
+    position:absolute;
+    inset:-3px;
+    border-radius:50%;
+    border:1.2px solid var(--sage);
+    opacity:0;
+    transform:scale(0.6);
+  }
+  .tap-ring.pulsing{
+    animation:tapPulse 0.6s ease-out;
+  }
+  @keyframes tapPulse{
+    0%{ opacity:0.9; transform:scale(0.6); }
+    100%{ opacity:0; transform:scale(1.6); }
+  }
+
+  .day-num{
+    font-size:0.56rem;
+    color:var(--text-faint);
+  }
+
+  /* ---- day detail view ---- */
+  .detail-sub{
+    font-size:0.68rem;
+    font-weight:500;
+    letter-spacing:0.04em;
+    color:var(--text-muted);
+    margin-top:0.3rem;
+  }
+
+  .detail-body{
+    margin-top:1.7rem;
+    font-size:clamp(0.9rem, 0.82rem + 0.3vw, 0.98rem);
+    line-height:1.65;
+    color:var(--text-primary);
+    opacity:0;
+    transition:opacity 0.6s ease;
+  }
+  .detail-body.shown{ opacity:1; }
+
   /* ---------- fade seam ---------- */
   .seam{
     flex:0 0 auto;
@@ -180,19 +268,7 @@
     align-items:center;
     justify-content:center;
     flex-direction:column;
-    gap:0.9rem;
     padding:2vh 6vw 4vh;
-  }
-
-  .download-kicker{
-    font-size:0.68rem;
-    font-weight:500;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--text-muted);
-    text-align:center;
-    max-width:320px;
-    line-height:1.5;
   }
 
   .download-btn{
@@ -228,16 +304,10 @@
     flex-shrink:0;
   }
 
-  .download-sub{
-    font-size:0.72rem;
-    color:var(--text-faint);
-    letter-spacing:0.02em;
-  }
-
-  @media (max-height: 560px){
-    .app-screen{ padding:3vh 6vw 1vh; }
+  @media (max-height: 620px){
+    .app-screen{ padding-top:max(5vh, calc(env(safe-area-inset-top) + 22px)); }
     .seam{ height:8vh; }
-    .grid-card{ max-width:320px; }
+    .entry-body{ min-height:4.5em; margin-top:1rem; }
     .status-row{ margin-top:1rem; }
   }
 </style>
@@ -245,24 +315,38 @@
 <body>
 
   <div class="app-screen">
-    <div class="grid-card">
-      <div class="grid-month-label" id="monthLabel">—</div>
-      <div class="grid-sub">one page, every day</div>
-      <div class="weekday-row">
-        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+    <div class="stage">
+
+      <div class="view" id="viewWrite">
+        <div class="date-heading" id="dateHeading">—</div>
+        <div class="time-label" id="timeLabel">—</div>
+        <div class="entry-body" id="entryBody"><span class="cursor" id="cursor"></span></div>
+        <div class="status-row">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText"></span>
+        </div>
       </div>
-      <div class="day-grid" id="dayGrid"></div>
-      <div class="status-row">
-        <span class="status-dot" id="statusDot"></span>
-        <span class="status-text" id="statusText"></span>
+
+      <div class="view" id="viewGrid">
+        <div class="grid-month-label" id="monthLabel">—</div>
+        <div class="weekday-row">
+          <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+        </div>
+        <div class="day-grid" id="dayGrid"></div>
       </div>
+
+      <div class="view" id="viewDetail">
+        <div class="date-heading" id="detailDate">—</div>
+        <div class="detail-sub">tap anywhere to close</div>
+        <div class="detail-body" id="detailBody"></div>
+      </div>
+
     </div>
   </div>
 
   <div class="seam"></div>
 
   <div class="download-section">
-    <div class="download-kicker">a dot a day — size grows with what you write, only the days you show up for are ever open</div>
     <a class="download-btn" id="downloadBtn" href="https://github.com/SamarthKulkarni16/logs_app_for_you/releases/latest/download/daily-logs.apk" download>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v12"></path>
@@ -271,34 +355,102 @@
       </svg>
       Download
     </a>
-    <div class="download-sub">Android · signed release APK</div>
   </div>
 
 <script>
-  const monthLabel = document.getElementById('monthLabel');
-  const dayGrid = document.getElementById('dayGrid');
+  // Ten distinct daily-log style entries, short "main actions" phrasing —
+  // not philosophical quotes. Cycled through (starting at a random point
+  // each page load) so repeat visitors see different content.
+  const entries = [
+    "Woke up early, went for a 5k run. Fixed the OAuth bug that was blocking the build. Read a bit before bed.",
+    "Hit a new PR on deadlifts today. Recorded two voiceovers for the pipeline. Called home in the evening.",
+    "Debugged the sync issue for three hours, finally found it. Skipped lunch, regretted it. Watched the sunset.",
+    "Wrote the first draft of the new chapter. Went for a walk to clear my head. Slept early for once.",
+    "Meeting ran long, didn't get much coding done. Pushed through anyway and shipped the CI fix.",
+    "Rest day from lifting. Spent the morning reading, afternoon on the pipeline. Good catch-up with an old friend.",
+    "Recorded three video scripts back to back. Voice was tired by the end. Too lazy to cook, ordered food.",
+    "Fixed the Gemini integration bug. Took a break to play guitar for a bit. Early night, behind on sleep.",
+    "Long run this morning, legs are sore now. Reviewed pull requests all afternoon. Journaled more than usual.",
+    "Quiet day. Cleaned up the notes site's sync bug. Cooked dinner from scratch for the first time in weeks."
+  ];
+
+  const dateHeading = document.getElementById('dateHeading');
+  const timeLabel = document.getElementById('timeLabel');
+  const entryBody = document.getElementById('entryBody');
+  const cursor = document.getElementById('cursor');
   const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
 
-  const now = new Date();
-  monthLabel.textContent = now.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const viewWrite = document.getElementById('viewWrite');
+  const viewGrid = document.getElementById('viewGrid');
+  const viewDetail = document.getElementById('viewDetail');
 
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  // Monday-first leading blanks
+  const monthLabel = document.getElementById('monthLabel');
+  const dayGrid = document.getElementById('dayGrid');
+
+  const detailDate = document.getElementById('detailDate');
+  const detailBody = document.getElementById('detailBody');
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function showView(view){
+    [viewWrite, viewGrid, viewDetail].forEach(v => v.classList.toggle('visible', v === view));
+  }
+
+  function updateClock(){
+    const now = new Date();
+    dateHeading.textContent = now.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+    let h = now.getHours();
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    timeLabel.textContent = `${h}:${m} ${ampm}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function setStatus(text, opts = {}){
+    statusText.textContent = text;
+    statusDot.classList.toggle('sage', !!opts.sage);
+    statusText.classList.toggle('sage', !!opts.sage);
+    statusDot.classList.toggle('pulse', !!opts.pulse);
+  }
+
+  async function typeInto(el, text){
+    el.textContent = '';
+    el.appendChild(cursor);
+    cursor.classList.remove('hidden');
+    for (let i = 0; i < text.length; i++){
+      el.textContent = text.slice(0, i + 1);
+      el.appendChild(cursor);
+      const ch = text[i];
+      let delay = 42 + Math.random() * 48;
+      if (ch === ' ') delay *= 0.6;
+      if (ch === ',') delay += 160;
+      if (ch === '.') delay += 260;
+      await sleep(delay);
+    }
+    cursor.classList.add('hidden');
+  }
+
+  // ---- month grid construction (fixed dot sizes, no growth) ----
+  const now0 = new Date();
+  const daysInMonth = new Date(now0.getFullYear(), now0.getMonth() + 1, 0).getDate();
+  const firstOfMonth = new Date(now0.getFullYear(), now0.getMonth(), 1);
   let leading = firstOfMonth.getDay() - 1;
   if (leading < 0) leading = 6;
+  const todayDate = now0.getDate();
 
-  const cells = [];
-  for (let i = 0; i < leading; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  monthLabel.textContent = now0.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
-  const todayDate = now.getDate();
+  const cellDefs = [];
+  for (let i = 0; i < leading; i++) cellDefs.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cellDefs.push(d);
 
   dayGrid.innerHTML = '';
-  const dotEls = [];
+  const dotByDay = {};
 
-  cells.forEach((day) => {
+  cellDefs.forEach((day) => {
     const cell = document.createElement('div');
     cell.className = 'day-cell';
     if (day === null) {
@@ -312,10 +464,14 @@
     const ring = document.createElement('div');
     ring.className = 'today-ring' + (day === todayDate ? ' active' : '');
 
+    const tapRing = document.createElement('div');
+    tapRing.className = 'tap-ring';
+
     const dot = document.createElement('div');
-    dot.className = 'day-dot';
+    dot.className = 'day-dot' + (day <= todayDate ? ' written' : '');
 
     wrap.appendChild(ring);
+    wrap.appendChild(tapRing);
     wrap.appendChild(dot);
 
     const num = document.createElement('div');
@@ -326,62 +482,83 @@
     cell.appendChild(num);
     dayGrid.appendChild(cell);
 
-    if (day <= todayDate) dotEls.push({ dot, day });
+    dotByDay[day] = { dot, tapRing };
   });
 
-  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-  function setStatus(text, opts = {}){
-    statusText.textContent = text;
-    statusDot.classList.toggle('sage', !!opts.sage);
-    statusText.classList.toggle('sage', !!opts.sage);
-    statusDot.classList.toggle('pulse', !!opts.pulse);
+  function dateLabelFor(day){
+    const d = new Date(now0.getFullYear(), now0.getMonth(), day);
+    return d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
   }
 
-  // Deterministic-feeling pseudo-random word counts per day, so the
-  // animation looks like a real month of uneven logging rather than a
-  // uniform fill.
-  function wordCountFor(day){
-    const seed = Math.sin(day * 12.9898) * 43758.5453;
-    const frac = seed - Math.floor(seed);
-    return Math.floor(frac * 140) + 5;
-  }
+  // choose a handful of past written days to tap across loops, distinct
+  // from "today" — falls back gracefully early in the month
+  const pastCandidates = [];
+  for (let d = 1; d < todayDate; d++) pastCandidates.push(d);
+  if (pastCandidates.length === 0) pastCandidates.push(todayDate);
 
-  function sizeForWordCount(words){
-    const ratio = Math.min(1, Math.log(words + 1) / Math.log(151));
-    return 5 + (18 - 5) * ratio;
-  }
+  let entryIndex = Math.floor(Math.random() * entries.length);
+  let pastCursor = Math.floor(Math.random() * pastCandidates.length);
 
-  async function fillLoop(){
+  async function mainLoop(){
     while (true){
-      // reset
-      dotEls.forEach(({ dot }) => {
-        dot.classList.remove('written');
-        dot.style.width = '5px';
-        dot.style.height = '5px';
-      });
+      // ---- phase 1: write today's entry ----
+      showView(viewWrite);
       setStatus('');
+      await sleep(500);
+
+      const text = entries[entryIndex % entries.length];
+      entryIndex++;
+      await typeInto(entryBody, text);
+
       await sleep(700);
+      setStatus('saving…');
+      await sleep(500);
+      setStatus('saved on device');
+      await sleep(700);
+      setStatus('syncing…', { sage:true, pulse:true });
+      await sleep(800);
+      setStatus('synced', { sage:true });
+      await sleep(1600);
 
-      for (const { dot, day } of dotEls){
-        setStatus('writing…', { pulse: true });
-        await sleep(140 + Math.random() * 90);
-        const size = sizeForWordCount(wordCountFor(day));
-        dot.classList.add('written');
-        dot.style.width = size + 'px';
-        dot.style.height = size + 'px';
-        setStatus('saved on device');
-        await sleep(70);
+      // ---- phase 2: open the month grid ----
+      showView(viewGrid);
+      await sleep(1300);
+
+      // ---- phase 3: tap a past day ----
+      const pastDay = pastCandidates[pastCursor % pastCandidates.length];
+      pastCursor++;
+      const target = dotByDay[pastDay];
+      if (target){
+        target.tapRing.classList.remove('pulsing');
+        target.dot.classList.remove('tapped');
+        void target.tapRing.offsetWidth; // restart animation
+        target.tapRing.classList.add('pulsing');
+        target.dot.classList.add('tapped');
+        await sleep(350);
+        target.dot.classList.remove('tapped');
       }
+      await sleep(450);
 
-      setStatus('syncing…', { sage: true, pulse: true });
-      await sleep(1000);
-      setStatus('synced', { sage: true });
-      await sleep(4500);
+      // ---- phase 4: show that day's log, read-only ----
+      const pastText = entries[(entryIndex + 3) % entries.length];
+      detailDate.textContent = dateLabelFor(pastDay);
+      detailBody.textContent = pastText;
+      detailBody.classList.remove('shown');
+      showView(viewDetail);
+      await sleep(150);
+      detailBody.classList.add('shown');
+
+      // hold long enough to read
+      const readTime = Math.max(2600, pastText.length * 32);
+      await sleep(readTime);
+
+      // ---- back to grid briefly, then next loop ----
+      showView(viewGrid);
+      await sleep(900);
     }
   }
 
-  fillLoop();
+  mainLoop();
 </script>
 
 </body>
