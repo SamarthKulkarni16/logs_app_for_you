@@ -13,10 +13,8 @@ class LogsRepository(private val supabase: SupabaseClient) {
 
     suspend fun upsertLog(userId: String, logDate: String, body: String): LogRow {
         return supabase.from("daily_logs")
-            .upsert(
-                LogRow(userId = userId, logDate = logDate, body = body),
+            .upsert(LogRow(userId = userId, logDate = logDate, body = body)) {
                 onConflict = "user_id,log_date"
-            ) {
                 select()
             }
             .decodeSingle<LogRow>()
