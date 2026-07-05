@@ -35,6 +35,8 @@ jobs:
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
 
       - name: Build signed release APK
+        id: build
+        continue-on-error: true
         env:
           RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -45,7 +47,16 @@ jobs:
             -PSUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             -PSUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
             -PGOOGLE_WEB_CLIENT_ID="${{ secrets.GOOGLE_WEB_CLIENT_ID }}" \
-            -PGEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
+            -PGEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" 2>&1 | tee /tmp/build.log
+
+      - name: TEMP - report compile errors
+        if: steps.build.outcome == 'failure'
+        run: |
+          grep -B1 -A6 "^e: \|error:" /tmp/build.log | head -150 | while IFS= read -r line; do
+            safe=$(echo "$line" | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
+            echo "::error::$safe"
+          done
+          exit 1
 
       - name: Clean up keystore from runner
         if: always()
