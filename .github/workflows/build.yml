@@ -50,7 +50,7 @@ jobs:
             -PGOOGLE_WEB_CLIENT_ID="${{ secrets.GOOGLE_WEB_CLIENT_ID }}" \
             -PGEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" 2>&1 | tee /tmp/build.log
 
-      - name: TEMP - report compile errors
+      - name: Report build log on failure
         if: steps.build.outcome == 'failure'
         run: |
           grep -B1 -A6 "^e: \|error:" /tmp/build.log | head -150 | while IFS= read -r line; do
@@ -62,9 +62,6 @@ jobs:
       - name: Clean up keystore from runner
         if: always()
         run: rm -f release.keystore
-
-      - name: TEMP - list release output files
-        run: find app/build/outputs/apk -type f 2>&1 | while IFS= read -r line; do echo "::error::$line"; done
 
       - name: Rename APK for public download
         run: cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/daily-logs.apk

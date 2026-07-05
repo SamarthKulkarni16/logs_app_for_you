@@ -88,6 +88,7 @@ class AuthViewModel(
     }
 
     /** A user is "new" if their account was created within a few seconds of this sign-in. */
+    @OptIn(kotlin.time.ExperimentalTime::class)
     private fun isNewAccount(user: UserInfo?): Boolean {
         val created = user?.createdAt ?: return false
         val lastSignIn = user.lastSignInAt ?: return true
