@@ -62,6 +62,9 @@ jobs:
         if: always()
         run: rm -f release.keystore
 
+      - name: TEMP - list release output files
+        run: find app/build/outputs/apk -type f 2>&1 | while IFS= read -r line; do echo "::error::$line"; done
+
       - name: Rename APK for public download
         run: cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/daily-logs.apk
 
