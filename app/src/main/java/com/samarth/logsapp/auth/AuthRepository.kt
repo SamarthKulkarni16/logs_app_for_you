@@ -56,5 +56,7 @@ class AuthRepository(private val supabase: SupabaseClient) {
 
     fun currentUserId(): String? =
         supabase.auth.currentUserOrNull()?.id
+
+    fun currentUser() = supabase.auth.currentUserOrNull()
 }
 

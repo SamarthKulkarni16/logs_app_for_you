@@ -1,25 +1,36 @@
 package com.samarth.logsapp.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.samarth.logsapp.auth.AuthUiState
 import com.samarth.logsapp.auth.AuthViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun SignInScreen(viewModel: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isSignUpMode by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
     val isLoading = uiState is AuthUiState.Loading
+    val successState = uiState as? AuthUiState.Success
+
+    if (successState != null) {
+        WelcomeOverlay(
+            isNewAccount = successState.isNewAccount,
+            onFinished = { viewModel.completeAuthFlow() }
+        )
+        return
+    }
 
     Box(
         modifier = Modifier
@@ -40,7 +51,7 @@ fun SignInScreen(viewModel: AuthViewModel) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = if (isSignUpMode) "Create an account to begin" else "Sign in to continue",
+                text = "Sign in to continue",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -82,10 +93,7 @@ fun SignInScreen(viewModel: AuthViewModel) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = {
-                    if (isSignUpMode) viewModel.signUp(email, password)
-                    else viewModel.signIn(email, password)
-                },
+                onClick = { viewModel.continueWithEmail(email, password) },
                 enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -96,7 +104,7 @@ fun SignInScreen(viewModel: AuthViewModel) {
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text(if (isSignUpMode) "Sign up" else "Sign in")
+                    Text("Continue")
                 }
             }
 
@@ -109,19 +117,36 @@ fun SignInScreen(viewModel: AuthViewModel) {
             ) {
                 Text("Continue with Google")
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            TextButton(
-                onClick = { isSignUpMode = !isSignUpMode; viewModel.clearError() },
-                enabled = !isLoading
-            ) {
-                Text(
-                    if (isSignUpMode) "Already have an account? Sign in"
-                    else "New here? Create an account",
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
         }
+    }
+}
+
+@Composable
+private fun WelcomeOverlay(isNewAccount: Boolean, onFinished: () -> Unit) {
+    var phase by remember { mutableStateOf(1) }
+
+    LaunchedEffect(Unit) {
+        delay(3000)
+        phase = 2
+        delay(2000)
+        onFinished()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = when {
+                phase == 1 && isNewAccount -> "Account Created"
+                phase == 1 && !isNewAccount -> "Account Found"
+                isNewAccount -> "Welcome"
+                else -> "Welcome Back"
+            },
+            color = Color.White,
+            style = MaterialTheme.typography.headlineSmall
+        )
     }
 }
