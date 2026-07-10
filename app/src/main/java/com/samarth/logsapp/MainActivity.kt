@@ -3,7 +3,12 @@ package com.samarth.logsapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,13 +17,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.samarth.logsapp.auth.AuthRepository
 import com.samarth.logsapp.auth.AuthViewModel
 import com.samarth.logsapp.auth.AuthViewModelFactory
 import com.samarth.logsapp.auth.GoogleSignInHelper
 import com.samarth.logsapp.data.remote.GeminiRepository
+import com.samarth.logsapp.ui.screens.AccountScreen
 import com.samarth.logsapp.ui.screens.LogScreen
 import com.samarth.logsapp.ui.screens.LogViewModel
 import com.samarth.logsapp.ui.screens.LogViewModelFactory
@@ -69,7 +78,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen { LOG, MONTH_GRID }
+private enum class Screen { LOG, MONTH_GRID, ACCOUNT }
 
 /**
  * Top-level router: shows the sign-in screen while signed out, otherwise
@@ -106,18 +115,54 @@ private fun LogsAppRoot(
 
             when (screen) {
                 Screen.LOG -> {
-                    LogScreen(
-                        viewModel = logViewModel,
-                        onTripleTapToHistory = {
-                            monthGridViewModel.refresh() // pick up anything written since the grid was last shown
-                            screen = Screen.MONTH_GRID
-                        }
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LogScreen(
+                            viewModel = logViewModel,
+                            onTripleTapToHistory = {
+                                monthGridViewModel.refresh() // pick up anything written since the grid was last shown
+                                screen = Screen.MONTH_GRID
+                            }
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .windowInsetsPadding(WindowInsets.safeDrawing)
+                                .size(64.dp)
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onDoubleTap = { screen = Screen.ACCOUNT }
+                                    )
+                                }
+                        )
+                    }
                 }
                 Screen.MONTH_GRID -> {
-                    MonthGridScreen(
-                        viewModel = monthGridViewModel,
-                        onTripleTapToLog = { screen = Screen.LOG }
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        MonthGridScreen(
+                            viewModel = monthGridViewModel,
+                            onTripleTapToLog = { screen = Screen.LOG }
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .windowInsetsPadding(WindowInsets.safeDrawing)
+                                .size(64.dp)
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onDoubleTap = { screen = Screen.ACCOUNT }
+                                    )
+                                }
+                        )
+                    }
+                }
+                Screen.ACCOUNT -> {
+                    AccountScreen(
+                        email = authViewModel.currentUserEmail,
+                        onBack = { screen = Screen.LOG },
+                        onSignOut = {
+                            authViewModel.signOut()
+                            screen = Screen.LOG
+                        }
                     )
                 }
             }

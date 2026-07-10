@@ -27,6 +27,15 @@ class AuthViewModel(
 
     val sessionStatus: StateFlow<SessionStatus> = authRepository.sessionStatus
 
+    val currentUserEmail: String?
+        get() = authRepository.currentUser()?.email
+
+    fun signOut() {
+        viewModelScope.launch {
+            runCatching { authRepository.signOut() }
+        }
+    }
+
     /**
      * Single entry point for email auth. Tries signing in first; if that fails
      * (most likely because no account exists yet with this email), attempts to

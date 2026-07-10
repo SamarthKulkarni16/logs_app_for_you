@@ -37,9 +37,9 @@ import com.samarth.logsapp.ui.theme.AccentDimColor
 import com.samarth.logsapp.ui.theme.InputBorderColor
 import com.samarth.logsapp.ui.theme.MutedColor
 
-private val WRITTEN_DOT_SIZE = 9.dp
-private val UNWRITTEN_DOT_SIZE = 4.dp
-private val RING_SIZE = 18.dp
+private val WRITTEN_DOT_SIZE = 15.dp
+private val UNWRITTEN_DOT_SIZE = 7.dp
+private val RING_SIZE = 32.dp
 
 /**
  * Month-grid history. Every cell is a real calendar day (Monday-first);
@@ -123,6 +123,7 @@ private fun MonthHeader(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
+            fontSize = 17.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
@@ -144,6 +145,7 @@ private fun WeekdayLabels() {
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
                 color = MutedColor,
+                fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
@@ -162,7 +164,7 @@ private fun CalendarGrid(days: List<DayCell>, onDayTap: (String) -> Unit) {
     val cells: List<DayCell?> = List(leadingBlanks) { null } + days
     val rows = cells.chunked(7)
 
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
         rows.forEach { row ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 row.forEach { cell ->
@@ -198,7 +200,7 @@ private fun DayCellView(cell: DayCell, onDayTap: (String) -> Unit) {
                             drawCircle(
                                 color = AccentDimColor,
                                 radius = size.minDimension / 2,
-                                style = Stroke(width = 1.4.dp.toPx())
+                                style = Stroke(width = 2.2.dp.toPx())
                             )
                         }
                     } else Modifier
@@ -212,12 +214,12 @@ private fun DayCellView(cell: DayCell, onDayTap: (String) -> Unit) {
                     .background(if (cell.written) AccentColor else InputBorderColor)
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = cell.dayOfMonth.toString(),
             style = MaterialTheme.typography.labelSmall,
             color = if (cell.written) MutedColor else InputBorderColor,
-            fontSize = 10.sp
+            fontSize = 15.sp
         )
     }
 }
